@@ -2,11 +2,13 @@
 
 import { useState, useMemo } from "react";
 import { WorkOrderCard } from "@/components/WorkOrderCard";
+import { KanbanBoard } from "@/components/KanbanBoard";
 import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Search, Package } from "lucide-react";
 import Link from "next/link";
 import useSWR from "swr";
@@ -14,6 +16,7 @@ import useSWR from "swr";
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function WorkOrdersPage() {
+  const [view, setView] = useState<"grid" | "kanban">("grid");
   const [stage, setStage] = useState<string>("all");
   const [search, setSearch] = useState("");
   
@@ -58,6 +61,13 @@ export default function WorkOrdersPage() {
       </div>
 
       <Card className="p-3 flex items-center gap-3">
+        <Tabs value={view} onValueChange={(v) => setView(v as "grid" | "kanban")}>
+          <TabsList>
+            <TabsTrigger value="grid">Grid</TabsTrigger>
+            <TabsTrigger value="kanban">Kanban</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        
         <div className="flex items-center gap-2 w-full max-w-md">
           <Search className="h-4 w-4 text-gray-500" />
           <Input
@@ -108,6 +118,8 @@ export default function WorkOrdersPage() {
             </Link>
           }
         />
+      ) : view === "kanban" ? (
+        <KanbanBoard workOrders={filtered} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((wo: any) => (

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import {
   Package,
@@ -12,40 +13,66 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const routes = [
+const allRoutes = [
   {
     label: "Work Orders",
     icon: Package,
     href: "/work-orders",
     color: "text-sky-500",
+    roles: ["OWNER", "OPS"],
+  },
+  {
+    label: "My Work",
+    icon: Package,
+    href: "/my-work",
+    color: "text-sky-500",
+    roles: ["EU_TAILOR"],
+  },
+  {
+    label: "My Tasks",
+    icon: Package,
+    href: "/my-tasks",
+    color: "text-purple-500",
+    roles: ["KE_TAILOR"],
   },
   {
     label: "Tailors",
     icon: Users,
     href: "/tailors",
     color: "text-violet-500",
+    roles: ["OWNER", "OPS"],
   },
   {
     label: "QC",
     icon: CheckCircle,
     href: "/qc",
     color: "text-pink-700",
+    roles: ["OWNER", "OPS", "QC"],
   },
   {
     label: "Shipments",
     icon: Truck,
     href: "/shipments",
     color: "text-orange-700",
+    roles: ["OWNER", "OPS"],
   },
   {
     label: "Settings",
     icon: Settings,
     href: "/settings",
+    roles: ["OWNER", "OPS"],
   },
 ];
 
 export const Sidebar = () => {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const userRole = (session?.user as any)?.role || "OPS";
+
+  // Filter routes by role
+  const routes = allRoutes.filter((route) =>
+    route.roles.includes(userRole)
+  );
 
   return (
     <div className="space-y-4 py-4 flex flex-col h-full bg-gray-900 text-white">

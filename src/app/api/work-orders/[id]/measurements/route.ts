@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
 import { logAudit } from "@/lib/audit";
+import { sendEmail } from "@/lib/email";
 
 // POST /api/work-orders/[id]/measurements
 export async function POST(
@@ -39,9 +40,10 @@ export async function POST(
     });
 
     // Update work order stage to measurement_submitted
-    await prisma.workOrder.update({
+    const updatedWorkOrder = await prisma.workOrder.update({
       where: { id },
       data: { currentStage: "measurement_submitted" },
+      include: { customer: true },
     });
 
     await logAudit({
@@ -49,6 +51,18 @@ export async function POST(
       action: "measurement_created",
       target: id,
       diff: { measurementId: measurement.id, source: measurement.source },
+    });
+
+    // Send email notification
+    await sendEmail({
+      to: "ops@niloticsuits.com",
+      subject: "New Measurement Submitted",
+      template: "measurementSubmitted",
+      data: {
+        workOrderId: id,
+        customerName: updatedWorkOrder.customer.name,
+        customerEmail: updatedWorkOrder.customer.email,
+      },
     });
 
     return NextResponse.json(measurement);
