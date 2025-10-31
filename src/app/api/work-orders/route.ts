@@ -10,36 +10,44 @@ export async function GET(req: NextRequest) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
     const stage = searchParams.get("stage");
-    const tailorId = searchParams.get("tailorId");
+    const priority = searchParams.get("priority");
+    const assignedTailor = searchParams.get("assignedTailor");
+    const search = searchParams.get("search");
 
     const where: any = { deletedAt: null };
+
+    // Stage filter
     if (stage) where.currentStage = stage;
-    if (tailorId) where.assignedEuTailorId = tailorId;
 
-    const [workOrders, total] = await Promise.all([
-      prisma.workOrder.findMany({
-        where,
-        include: {
-          customer: true,
-          assignedEuTailor: { select: { id: true, name: true, email: true } },
-          tasks: { where: { deletedAt: null } },
-        },
-        orderBy: { createdAt: "desc" },
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      prisma.workOrder.count({ where }),
-    ]);
+    // Priority filter (range)
+    if (priority) {
+      const [min, max] = priority.split("-").map(Number);
+      where.priority = { gte: min, lte: max };
+    }
 
-    return NextResponse.json({
-      workOrders,
-      total,
-      page,
-      pages: Math.ceil(total / limit),
+    // Assigned tailor filter
+    if (assignedTailor) where.assignedEuTailorId = assignedTailor;
+
+    // Search filter (customer name, email, or ID)
+    if (search) {
+      where.OR = [
+        { id: { contains: search } },
+        { customer: { name: { contains: search, mode: "insensitive" } } },
+        { customer: { email: { contains: search, mode: "insensitive" } } },
+      ];
+    }
+
+    const workOrders = await prisma.workOrder.findMany({
+      where,
+      include: {
+        customer: true,
+        assignedEuTailor: { select: { id: true, name: true, email: true } },
+      },
+      orderBy: { createdAt: "desc" },
     });
+
+    return NextResponse.json(workOrders);
   } catch (error) {
     console.error("Get work orders error:", error);
     return NextResponse.json(

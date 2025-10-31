@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Package } from "lucide-react";
+import { Plus, Search, Package, Download } from "lucide-react";
 import Link from "next/link";
 import useSWR from "swr";
 
@@ -36,6 +36,41 @@ export default function WorkOrdersPage() {
     );
   }, [data, search]);
 
+  const handleExport = () => {
+    if (!filtered?.length) return;
+
+    const headers = [
+      "ID", "Customer Name", "Customer Email", "Customer Phone",
+      "Current Stage", "Priority", "Due Date", "Assigned EU Tailor",
+      "Created At", "Updated At"
+    ];
+
+    const rows = filtered.map((wo: any) => [
+      wo.id,
+      wo.customer.name,
+      wo.customer.email,
+      wo.customer.phone || "",
+      wo.currentStage,
+      wo.priority,
+      wo.dueAt || "",
+      wo.assignedEuTailor?.name || "",
+      wo.createdAt,
+      wo.updatedAt
+    ]);
+
+    const csv = [headers, ...rows]
+      .map(row => row.map(cell => `"${cell}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `work-orders-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (error) {
     return (
       <div className="text-center py-12">
@@ -53,11 +88,21 @@ export default function WorkOrdersPage() {
             Manage all custom suit orders from measurement to delivery
           </p>
         </div>
-        <Link href="/work-orders/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" /> Create Work Order
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            disabled={!filtered?.length}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
           </Button>
-        </Link>
+          <Link href="/work-orders/new">
+            <Button>
+              <Plus className="h-4 w-4 mr-2" /> Create Work Order
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Card className="p-3 flex items-center gap-3">

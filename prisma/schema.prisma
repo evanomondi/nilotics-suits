@@ -30,6 +30,7 @@ enum WorkOrderStage {
   at_eu_tailor
   eu_adjustment
   ready_for_pickup
+  delivered
   completed
   blocked
 }
@@ -43,10 +44,11 @@ enum TaskType {
 }
 
 enum TaskStatus {
-  pending
+  todo
   in_progress
-  completed
+  done
   blocked
+  cancelled
 }
 
 enum MeasurementSource {
@@ -57,9 +59,13 @@ enum MeasurementSource {
 enum ShipmentStatus {
   pending
   label_created
+  picked_up
   in_transit
+  out_for_delivery
   delivered
-  failed
+  delivery_failed
+  returned
+  on_hold
 }
 
 enum NoteVisibility {
@@ -200,24 +206,30 @@ model Measurement {
 }
 
 model Task {
-  id              String      @id @default(cuid())
-  workOrderId     String
-  type            TaskType
-  status          TaskStatus  @default(pending)
-  assigneeTailorId String?
-  checklist       Json?       // Array of checklist items
-  startedAt       DateTime?
-  finishedAt      DateTime?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  deletedAt       DateTime?
+  id                    String      @id @default(cuid())
+  workOrderId           String?
+  type                  TaskType
+  title                 String
+  description           String?     @db.Text
+  status                TaskStatus  @default(todo)
+  assigneeId            String?
+  checklist             Json?       // Array of checklist items
+  dueAt                 DateTime?
+  reminderSent          Boolean     @default(false)
+  overdueReminderSent   Boolean     @default(false)
+  startedAt             DateTime?
+  finishedAt            DateTime?
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+  deletedAt             DateTime?
 
-  workOrder       WorkOrder   @relation(fields: [workOrderId], references: [id])
-  assigneeTailor  User?       @relation("TailorAssignment", fields: [assigneeTailorId], references: [id])
+  workOrder             WorkOrder?  @relation(fields: [workOrderId], references: [id])
+  assignee              User?       @relation("TailorAssignment", fields: [assigneeId], references: [id])
 
   @@index([workOrderId])
-  @@index([assigneeTailorId])
+  @@index([assigneeId])
   @@index([status])
+  @@index([dueAt])
   @@map("tasks")
 }
 
@@ -258,19 +270,19 @@ model QCResult {
 }
 
 model Shipment {
-  id          String          @id @default(cuid())
-  workOrderId String
-  courier     String
-  waybill     String?
-  labelUrl    String?
-  cost        Float?
-  status      ShipmentStatus  @default(pending)
-  tracking    Json?           // Tracking data from courier
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  deletedAt   DateTime?
+  id              String          @id @default(cuid())
+  workOrderId     String
+  courier         String
+  waybill         String?         @unique
+  labelUrl        String?
+  cost            Float?
+  status          ShipmentStatus  @default(pending)
+  trackingHistory Json?           // Array of tracking events
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
 
-  workOrder   WorkOrder       @relation(fields: [workOrderId], references: [id])
+  workOrder       WorkOrder       @relation(fields: [workOrderId], references: [id])
 
   @@index([workOrderId])
   @@index([waybill])
@@ -310,4 +322,16 @@ model AuditLog {
   @@index([target])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  encrypted Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@index([key])
+  @@map("settings")
 }

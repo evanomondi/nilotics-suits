@@ -55,13 +55,13 @@ export async function POST(req: NextRequest) {
       // Basic mapping - customize based on your products
       if (productName.includes("suit") || productName.includes("jacket")) {
         tasks.push(
-          { type: "cutting", workOrderId: workOrder.id },
-          { type: "sewing_coat", workOrderId: workOrder.id },
-          { type: "finishing", workOrderId: workOrder.id }
+          { type: "cutting", title: "Cutting", workOrderId: workOrder.id },
+          { type: "sewing_coat", title: "Sewing Coat", workOrderId: workOrder.id },
+          { type: "finishing", title: "Finishing", workOrderId: workOrder.id }
         );
       }
       if (productName.includes("trouser") || productName.includes("pant")) {
-        tasks.push({ type: "sewing_trouser", workOrderId: workOrder.id });
+        tasks.push({ type: "sewing_trouser", title: "Sewing Trouser", workOrderId: workOrder.id });
       }
     }
 

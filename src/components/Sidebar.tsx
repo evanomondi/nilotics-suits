@@ -10,6 +10,7 @@ import {
   CheckCircle,
   Truck,
   Settings,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -60,6 +61,13 @@ const allRoutes = [
     label: "Settings",
     icon: Settings,
     href: "/settings",
+    roles: ["OWNER", "OPS"],
+  },
+  {
+    label: "Audit Logs",
+    icon: FileText,
+    href: "/audit",
+    color: "text-gray-500",
     roles: ["OWNER", "OPS"],
   },
 ];

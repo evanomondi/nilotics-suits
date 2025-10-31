@@ -37,7 +37,7 @@ export async function GET(
         tasks: {
           where: { deletedAt: null },
           include: {
-            assigneeTailor: {
+            assignee: {
               select: { id: true, name: true, email: true },
             },
           },
@@ -123,7 +123,7 @@ export async function PATCH(
         const incompleteTasks = await prisma.task.count({
           where: {
             workOrderId: id,
-            status: { in: ["pending", "in_progress"] },
+            status: { in: ["todo", "in_progress"] },
             type: { not: "rework" },
           },
         });

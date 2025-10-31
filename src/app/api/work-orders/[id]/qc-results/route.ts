@@ -39,7 +39,9 @@ export async function POST(
         data: {
           workOrderId: id,
           type: "rework",
-          status: "pending",
+          title: "QC Rework Required",
+          description: `Rework needed based on QC inspection: ${qcResult.qcForm.name}`,
+          status: "todo",
         },
       });
 

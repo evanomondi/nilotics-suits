@@ -62,6 +62,27 @@ const templates = {
     <p>Your order <strong>{{workOrderId}}</strong> is ready for pickup at our EU location.</p>
     <p>Please contact us to schedule pickup.</p>
   `,
+  orderDelivered: `
+    <h2>Order Delivered</h2>
+    <p>Hello {{customerName}},</p>
+    <p>Your order <strong>{{workOrderId}}</strong> has been delivered.</p>
+    <p>Waybill: {{waybill}}</p>
+    <p>Thank you for choosing Nilotic Suits!</p>
+  `,
+  taskDueSoon: `
+    <h2>Task Reminder: Due Soon</h2>
+    <p>Hello {{assigneeName}},</p>
+    <p>Task "<strong>{{taskTitle}}</strong>" is due on {{dueAt}}.</p>
+    {{#if workOrderId}}<p>Work Order: {{workOrderId}}</p>{{/if}}
+    <p>Please complete this task on time.</p>
+  `,
+  taskOverdue: `
+    <h2>Task Overdue</h2>
+    <p>Hello {{assigneeName}},</p>
+    <p>Task "<strong>{{taskTitle}}</strong>" was due on {{dueAt}}.</p>
+    {{#if workOrderId}}<p>Work Order: {{workOrderId}}</p>{{/if}}
+    <p>Please complete this task as soon as possible.</p>
+  `,
 };
 
 export async function sendEmail({ to, subject, template, data }: EmailOptions) {

@@ -3,10 +3,10 @@ import { requireAuth } from "@/lib/rbac";
 import { prisma } from "@/lib/prisma";
 import { logAudit } from "@/lib/audit";
 
-// PATCH /api/work-orders/[id]/tasks/[taskId]
+// PATCH /api/tasks/[taskId]
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string; taskId: string } }
+  { params }: { params: { taskId: string } }
 ) {
   const session = await requireAuth();
   if (session instanceof NextResponse) return session;
@@ -20,7 +20,7 @@ export async function PATCH(
 
     if (body.status) {
       updateData.status = body.status;
-      
+
       // Set timestamps based on status
       if (body.status === "in_progress" && !body.startedAt) {
         updateData.startedAt = new Date();
@@ -72,6 +72,40 @@ export async function PATCH(
     console.error("Update task error:", error);
     return NextResponse.json(
       { error: "Failed to update task" },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE /api/tasks/[taskId]
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { taskId: string } }
+) {
+  const session = await requireAuth();
+  if (session instanceof NextResponse) return session;
+
+  try {
+    const { taskId } = params;
+    const user = session.user as any;
+
+    await prisma.task.update({
+      where: { id: taskId },
+      data: { deletedAt: new Date() },
+    });
+
+    await logAudit({
+      actorId: user.id,
+      action: "task_deleted",
+      target: taskId,
+      diff: {},
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Delete task error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete task" },
       { status: 500 }
     );
   }
