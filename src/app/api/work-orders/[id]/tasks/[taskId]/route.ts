@@ -6,13 +6,13 @@ import { logAudit } from "@/lib/audit";
 // PATCH /api/work-orders/[id]/tasks/[taskId]
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string; taskId: string } }
+  { params }: { params: Promise<{ id: string; taskId: string }> }
 ) {
   const session = await requireAuth();
   if (session instanceof NextResponse) return session;
 
   try {
-    const { taskId } = params;
+    const { taskId } = await params;
     const body = await req.json();
     const user = session.user as any;
 

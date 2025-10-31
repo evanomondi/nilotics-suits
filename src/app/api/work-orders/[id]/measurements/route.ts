@@ -7,13 +7,13 @@ import { sendEmail } from "@/lib/email";
 // POST /api/work-orders/[id]/measurements
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await requireAuth();
   if (session instanceof NextResponse) return session;
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const user = session.user as any;
 

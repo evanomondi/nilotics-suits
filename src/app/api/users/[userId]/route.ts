@@ -6,13 +6,13 @@ import { logAudit } from "@/lib/audit";
 // DELETE /api/users/[userId]
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   const session = await requirePermission("users:delete");
   if (session instanceof NextResponse) return session;
 
   try {
-    const { userId } = params;
+    const { userId } = await params;
     const user = session.user as any;
 
     // Prevent self-deletion

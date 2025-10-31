@@ -6,13 +6,13 @@ import { logAudit } from "@/lib/audit";
 // GET /api/work-orders/[id]
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await requirePermission("work-orders:read");
   if (session instanceof NextResponse) return session;
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const user = session.user as any;
 
     // Build where clause based on role
@@ -85,13 +85,13 @@ export async function GET(
 // PATCH /api/work-orders/[id]
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await requirePermission("work-orders:update");
   if (session instanceof NextResponse) return session;
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const user = session.user as any;
 

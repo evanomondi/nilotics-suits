@@ -6,13 +6,13 @@ import { logAudit } from "@/lib/audit";
 // PATCH /api/tasks/[taskId]
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { taskId: string } }
+  { params }: { params: Promise<{ taskId: string }> }
 ) {
   const session = await requireAuth();
   if (session instanceof NextResponse) return session;
 
   try {
-    const { taskId } = params;
+    const { taskId } = await params;
     const body = await req.json();
     const user = session.user as any;
 
@@ -80,13 +80,13 @@ export async function PATCH(
 // DELETE /api/tasks/[taskId]
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { taskId: string } }
+  { params }: { params: Promise<{ taskId: string }> }
 ) {
   const session = await requireAuth();
   if (session instanceof NextResponse) return session;
 
   try {
-    const { taskId } = params;
+    const { taskId } = await params;
     const user = session.user as any;
 
     await prisma.task.update({
