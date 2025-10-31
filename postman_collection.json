@@ -1,0 +1,157 @@
+{
+  "info": {
+    "name": "Nilotic Suits API",
+    "description": "API collection for testing Nilotic Suits back office endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Get Session",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/session",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "session"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Work Orders",
+      "item": [
+        {
+          "name": "List Work Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/work-orders?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "work-orders"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "stage", "value": "measurement_pending", "disabled": true },
+                { "key": "tailorId", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Work Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerData\": {\n    \"name\": \"John Smith\",\n    \"email\": \"john.smith@example.com\",\n    \"phone\": \"+33123456789\",\n    \"country\": \"France\",\n    \"city\": \"Lyon\"\n  },\n  \"priority\": 1,\n  \"dueAt\": \"2025-12-31T00:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/work-orders",
+              "host": ["{{base_url}}"],
+              "path": ["api", "work-orders"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Files",
+      "item": [
+        {
+          "name": "Get Presigned URL",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"filename\": \"measurement-photo.jpg\",\n  \"contentType\": \"image/jpeg\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/files/presign",
+              "host": ["{{base_url}}"],
+              "path": ["api", "files", "presign"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Webhooks",
+      "item": [
+        {
+          "name": "WooCommerce Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-WC-Webhook-Signature", "value": "sample-signature" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 12345,\n  \"status\": \"processing\",\n  \"billing\": {\n    \"first_name\": \"Jane\",\n    \"last_name\": \"Doe\",\n    \"email\": \"jane.doe@example.com\",\n    \"phone\": \"+33987654321\",\n    \"country\": \"FR\",\n    \"city\": \"Paris\"\n  },\n  \"line_items\": [\n    {\n      \"id\": 1,\n      \"name\": \"Custom 3-Piece Suit\",\n      \"quantity\": 1,\n      \"price\": 899.00\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/webhooks/woocommerce",
+              "host": ["{{base_url}}"],
+              "path": ["api", "webhooks", "woocommerce"]
+            }
+          }
+        },
+        {
+          "name": "Formbricks Response",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"responseId\": \"fb-resp-123\",\n  \"data\": {\n    \"chest\": 102,\n    \"waist\": 86,\n    \"hips\": 98,\n    \"shoulderWidth\": 45,\n    \"sleeveLength\": 64\n  },\n  \"photos\": [\n    \"https://example.com/photo1.jpg\",\n    \"https://example.com/photo2.jpg\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/webhooks/formbricks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "webhooks", "formbricks"]
+            }
+          }
+        },
+        {
+          "name": "Aramex Tracking Update",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"waybill\": \"ARX123456789\",\n  \"status\": \"delivered\",\n  \"timestamp\": \"2025-11-15T14:30:00Z\",\n  \"location\": \"Paris, France\",\n  \"updates\": [\n    {\n      \"status\": \"in_transit\",\n      \"location\": \"Nairobi, Kenya\",\n      \"timestamp\": \"2025-11-10T08:00:00Z\"\n    },\n    {\n      \"status\": \"delivered\",\n      \"location\": \"Paris, France\",\n      \"timestamp\": \"2025-11-15T14:30:00Z\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/webhooks/aramex",
+              "host": ["{{base_url}}"],
+              "path": ["api", "webhooks", "aramex"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}
